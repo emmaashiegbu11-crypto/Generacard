@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Cards — Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080b14;--panel:#0d1220;--border:#1a2a4a;--accent:#00d4ff;--accent2:#ff6b35;--accent3:#7b2fff;--gold:#ffd700;--green:#00ff88;--red:#ff3366;--text:#c8d8f0;--text-dim:#5a7090;--glow:0 0 20px rgba(0,212,255,0.4);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:900;}
+
+/* NAV */
+.top-nav{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;border-bottom:1px solid var(--border);background:rgba(8,11,20,0.98);position:sticky;top:0;z-index:200;backdrop-filter:blur(10px);}
+.nav-logo{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;color:var(--accent);letter-spacing:3px;text-shadow:var(--glow);}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-btn{padding:6px 16px;border-radius:3px;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;border:1px solid var(--accent);color:var(--accent);background:transparent;text-decoration:none;display:inline-flex;align-items:center;}
+.nav-btn:hover{background:var(--accent);color:#000;}
+.nav-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);}
+
+/* HEADER */
+.page-header{text-align:center;padding:36px 20px 28px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(0,212,255,0.06) 0%,transparent 100%);position:relative;}
+.page-header h1{font-family:'Orbitron',monospace;font-size:clamp(16px,3vw,28px);font-weight:900;color:var(--accent);text-shadow:var(--glow);letter-spacing:4px;}
+.page-header p{color:var(--text-dim);font-size:11px;letter-spacing:2px;margin-top:6px;font-family:'Share Tech Mono',monospace;}
+.corner-deco{position:absolute;width:13px;height:13px;border-color:var(--accent);border-style:solid;opacity:0.6;}
+.corner-deco.tl{top:9px;left:9px;border-width:2px 0 0 2px;}
+.corner-deco.tr{top:9px;right:9px;border-width:2px 2px 0 0;}
+.corner-deco.bl{bottom:9px;left:9px;border-width:0 0 2px 2px;}
+.corner-deco.br{bottom:9px;right:9px;border-width:0 2px 2px 0;}
+
+/* SEARCH & FILTER */
+.controls{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.search-box{flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:8px 14px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;outline:none;transition:all 0.2s;}
+.search-box:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(0,212,255,0.2);}
+.search-box::placeholder{color:var(--text-dim);}
+.filter-select{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;outline:none;cursor:pointer;}
+.filter-select option{background:#0d1220;}
+
+/* GRID */
+.gallery-wrap{padding:24px 20px;}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+
+/* LOADING */
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;}
+.load-ring{width:48px;height:48px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.load-text{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:80px 20px;}
+.empty-icon{font-size:52px;margin-bottom:16px;}
+.empty-title{font-family:'Orbitron',monospace;font-size:16px;color:var(--text-dim);letter-spacing:3px;margin-bottom:8px;}
+.empty-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);opacity:0.6;letter-spacing:1px;}
+
+/* CARD */
+.card-wrap{cursor:pointer;transition:transform 0.2s;animation:fadeIn 0.4s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.card-wrap:hover{transform:translateY(-4px);}
+.sys-window{width:100%;border-radius:6px;overflow:hidden;}
+.sys-window-inner{border:1px solid transparent;border-radius:6px;overflow:hidden;}
+.sys-titlebar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;position:relative;}
+.sys-titlebar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;}
+.titlebar-dots{display:flex;gap:5px;}
+.titlebar-dots span{width:8px;height:8px;border-radius:50%;}
+.sys-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.sys-top{display:flex;gap:12px;align-items:flex-start;}
+.sys-portrait{flex-shrink:0;width:80px;height:95px;border-radius:4px;overflow:hidden;position:relative;}
+.sys-portrait img,.sys-portrait .portrait-placeholder{width:100%;height:100%;object-fit:cover;}
+.portrait-placeholder{display:flex;align-items:center;justify-content:center;font-size:30px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.1);}
+.sys-identity{flex:1;min-width:0;}
+.sys-name{font-family:'Orbitron',monospace;font-size:clamp(13px,2vw,16px);font-weight:900;line-height:1.1;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sys-title-txt{font-size:9px;letter-spacing:2px;opacity:0.65;text-transform:uppercase;font-family:'Share Tech Mono',monospace;margin-bottom:6px;}
+.sys-class-badge{display:inline-block;padding:2px 8px;border-radius:2px;font-size:8px;letter-spacing:2px;font-family:'Orbitron',monospace;font-weight:700;margin-bottom:6px;text-transform:uppercase;}
+.sys-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;}
+.sys-meta-item{display:flex;flex-direction:column;gap:1px;}
+.meta-label{font-size:7px;letter-spacing:2px;opacity:0.45;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
+.meta-value{font-size:10px;font-weight:600;font-family:'Share Tech Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sys-stats{display:flex;flex-direction:column;gap:5px;}
+.sys-stat-row{display:flex;align-items:center;gap:8px;}
+.sys-stat-name{font-size:8px;letter-spacing:1.5px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;width:64px;flex-shrink:0;opacity:0.65;}
+.sys-stat-bar-bg{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;}
+.sys-stat-bar-fill{height:100%;border-radius:2px;position:relative;}
+.sys-stat-bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:shimmer 2s infinite;}
+@keyframes shimmer{from{transform:translateX(-100%);}to{transform:translateX(200%);}}
+.sys-stat-num{font-family:'Orbitron',monospace;font-size:9px;width:24px;text-align:right;opacity:0.9;}
+.sys-divider{height:1px;opacity:0.12;margin:2px 0;}
+.sys-section-title{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:3px;text-transform:uppercase;opacity:0.45;margin-bottom:6px;}
+.sys-powerups{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.sys-pu-tag{padding:3px 8px;border-radius:3px;font-size:8px;letter-spacing:1px;font-family:'Orbitron',monospace;font-weight:700;text-transform:uppercase;border:1px solid;display:flex;align-items:center;gap:4px;}
+.sys-footer{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;opacity:0.35;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.05);}
+
+/* CARD META BAR */
+.card-meta-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,0.02);border-top:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:1px;}
+.card-author{display:flex;align-items:center;gap:6px;}
+.author-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:3000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(6px);}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-box{background:#060a14;border:1px solid var(--accent);border-radius:10px;max-width:520px;width:100%;max-height:92vh;overflow-y:auto;position:relative;transform:scale(0.92);transition:transform 0.25s;box-shadow:0 0 60px rgba(0,212,255,0.2);}
+.modal-overlay.open .modal-box{transform:scale(1);}
+.modal-close{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;z-index:10;line-height:1;}
+.modal-close:hover{color:var(--accent);}
+.modal-inner{padding:20px;}
+
+/* THEMES */
+.theme-cyber .sys-window-inner{background:#080d1a;border-color:#00d4ff;box-shadow:0 0 30px rgba(0,212,255,0.12);}
+.theme-cyber .sys-titlebar{background:#040a14;color:#00d4ff;}.theme-cyber .sys-titlebar::after{background:rgba(0,212,255,0.3);}
+.theme-cyber .titlebar-dots span:nth-child(1){background:#ff3366;}.theme-cyber .titlebar-dots span:nth-child(2){background:#ffd700;}.theme-cyber .titlebar-dots span:nth-child(3){background:#00ff88;}
+.theme-cyber .sys-name{color:#00d4ff;text-shadow:0 0 15px rgba(0,212,255,0.5);}.theme-cyber .sys-class-badge{background:rgba(0,212,255,0.1);color:#00d4ff;border:1px solid rgba(0,212,255,0.3);}
+.theme-cyber .sys-stat-bar-fill{background:linear-gradient(90deg,#00d4ff,#7b2fff);}.theme-cyber .sys-stat-num{color:#00d4ff;}
+.theme-cyber .sys-pu-tag{border-color:rgba(0,212,255,0.4);color:#00d4ff;background:rgba(0,212,255,0.08);}.theme-cyber .sys-divider{background:rgba(0,212,255,0.3);}.theme-cyber .sys-section-title{color:#00d4ff;}.theme-cyber .portrait-placeholder{color:#00d4ff;}
+.theme-crimson .sys-window-inner{background:#120808;border-color:#ff3366;box-shadow:0 0 30px rgba(255,51,102,0.12);}
+.theme-crimson .sys-titlebar{background:#0a0404;color:#ff3366;}.theme-crimson .sys-titlebar::after{background:rgba(255,51,102,0.3);}
+.theme-crimson .titlebar-dots span:nth-child(1){background:#ff3366;}.theme-crimson .titlebar-dots span:nth-child(2){background:#ff8c00;}.theme-crimson .titlebar-dots span:nth-child(3){background:#ff6b35;}
+.theme-crimson .sys-name{color:#ff3366;}.theme-crimson .sys-class-badge{background:rgba(255,51,102,0.1);color:#ff3366;border:1px solid rgba(255,51,102,0.3);}
+.theme-crimson .sys-stat-bar-fill{background:linear-gradient(90deg,#ff3366,#ff8c00);}.theme-crimson .sys-stat-num{color:#ff3366;}
+.theme-crimson .sys-pu-tag{border-color:rgba(255,51,102,0.4);color:#ff3366;background:rgba(255,51,102,0.08);}.theme-crimson .sys-divider{background:rgba(255,51,102,0.3);}.theme-crimson .sys-section-title{color:#ff3366;}.theme-crimson .portrait-placeholder{color:#ff3366;}
+.theme-emerald .sys-window-inner{background:#071210;border-color:#00ff88;}.theme-emerald .sys-titlebar{background:#030a08;color:#00ff88;}.theme-emerald .sys-titlebar::after{background:rgba(0,255,136,0.3);}
+.theme-emerald .titlebar-dots span:nth-child(1){background:#ff3366;}.theme-emerald .titlebar-dots span:nth-child(2){background:#ffd700;}.theme-emerald .titlebar-dots span:nth-child(3){background:#00ff88;}
+.theme-emerald .sys-name{color:#00ff88;}.theme-emerald .sys-class-badge{background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid rgba(0,255,136,0.3);}
+.theme-emerald .sys-stat-bar-fill{background:linear-gradient(90deg,#00ff88,#00d4ff);}.theme-emerald .sys-stat-num{color:#00ff88;}
+.theme-emerald .sys-pu-tag{border-color:rgba(0,255,136,0.4);color:#00ff88;background:rgba(0,255,136,0.08);}.theme-emerald .sys-divider{background:rgba(0,255,136,0.3);}.theme-emerald .sys-section-title{color:#00ff88;}.theme-emerald .portrait-placeholder{color:#00ff88;}
+.theme-void .sys-window-inner{background:#0b0812;border-color:#b06eff;}.theme-void .sys-titlebar{background:#060410;color:#b06eff;}.theme-void .sys-titlebar::after{background:rgba(176,110,255,0.3);}
+.theme-void .titlebar-dots span:nth-child(1){background:#ff3366;}.theme-void .titlebar-dots span:nth-child(2){background:#ffd700;}.theme-void .titlebar-dots span:nth-child(3){background:#b06eff;}
+.theme-void .sys-name{color:#b06eff;}.theme-void .sys-class-badge{background:rgba(176,110,255,0.1);color:#b06eff;border:1px solid rgba(176,110,255,0.3);}
+.theme-void .sys-stat-bar-fill{background:linear-gradient(90deg,#7b2fff,#b06eff);}.theme-void .sys-stat-num{color:#b06eff;}
+.theme-void .sys-pu-tag{border-color:rgba(176,110,255,0.4);color:#b06eff;background:rgba(176,110,255,0.08);}.theme-void .sys-divider{background:rgba(176,110,255,0.3);}.theme-void .sys-section-title{color:#b06eff;}.theme-void .portrait-placeholder{color:#b06eff;}
+.theme-gold .sys-window-inner{background:#100e04;border-color:#ffd700;}.theme-gold .sys-titlebar{background:#090700;color:#ffd700;}.theme-gold .sys-titlebar::after{background:rgba(255,215,0,0.3);}
+.theme-gold .titlebar-dots span:nth-child(1){background:#ff3366;}.theme-gold .titlebar-dots span:nth-child(2){background:#ffd700;}.theme-gold .titlebar-dots span:nth-child(3){background:#ff8c00;}
+.theme-gold .sys-name{color:#ffd700;}.theme-gold .sys-class-badge{background:rgba(255,215,0,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.3);}
+.theme-gold .sys-stat-bar-fill{background:linear-gradient(90deg,#ffd700,#ff8c00);}.theme-gold .sys-stat-num{color:#ffd700;}
+.theme-gold .sys-pu-tag{border-color:rgba(255,215,0,0.4);color:#ffd700;background:rgba(255,215,0,0.08);}.theme-gold .sys-divider{background:rgba(255,215,0,0.3);}.theme-gold .sys-section-title{color:#ffd700;}.theme-gold .portrait-placeholder{color:#ffd700;}
+.theme-ice .sys-window-inner{background:#060e14;border-color:#a0e8ff;}.theme-ice .sys-titlebar{background:#03080c;color:#a0e8ff;}.theme-ice .sys-titlebar::after{background:rgba(160,232,255,0.3);}
+.theme-ice .titlebar-dots span:nth-child(1){background:#ff3366;}.theme-ice .titlebar-dots span:nth-child(2){background:#a0e8ff;}.theme-ice .titlebar-dots span:nth-child(3){background:#fff;}
+.theme-ice .sys-name{color:#a0e8ff;}.theme-ice .sys-class-badge{background:rgba(160,232,255,0.1);color:#a0e8ff;border:1px solid rgba(160,232,255,0.3);}
+.theme-ice .sys-stat-bar-fill{background:linear-gradient(90deg,#a0e8ff,#fff);}.theme-ice .sys-stat-num{color:#a0e8ff;}
+.theme-ice .sys-pu-tag{border-color:rgba(160,232,255,0.4);color:#a0e8ff;background:rgba(160,232,255,0.08);}.theme-ice .sys-divider{background:rgba(160,232,255,0.3);}.theme-ice .sys-section-title{color:#a0e8ff;}.theme-ice .portrait-placeholder{color:#a0e8ff;}
+.theme-inferno .sys-window-inner{background:#100600;border-color:#ff6b35;}.theme-inferno .sys-titlebar{background:#0a0300;color:#ff6b35;}.theme-inferno .sys-titlebar::after{background:rgba(255,107,53,0.3);}
+.theme-inferno .titlebar-dots span:nth-child(1){background:#ff3366;}.theme-inferno .titlebar-dots span:nth-child(2){background:#ffd700;}.theme-inferno .titlebar-dots span:nth-child(3){background:#ff6b35;}
+.theme-inferno .sys-name{color:#ff6b35;}.theme-inferno .sys-class-badge{background:rgba(255,107,53,0.1);color:#ff6b35;border:1px solid rgba(255,107,53,0.3);}
+.theme-inferno .sys-stat-bar-fill{background:linear-gradient(90deg,#ff3300,#ffd700);}.theme-inferno .sys-stat-num{color:#ff6b35;}
+.theme-inferno .sys-pu-tag{border-color:rgba(255,107,53,0.4);color:#ff6b35;background:rgba(255,107,53,0.08);}.theme-inferno .sys-divider{background:rgba(255,107,53,0.3);}.theme-inferno .sys-section-title{color:#ff6b35;}.theme-inferno .portrait-placeholder{color:#ff6b35;}
+.theme-shadow .sys-window-inner{background:#080808;border-color:#888;}.theme-shadow .sys-titlebar{background:#040404;color:#aaa;}.theme-shadow .sys-titlebar::after{background:rgba(136,136,136,0.3);}
+.theme-shadow .titlebar-dots span:nth-child(1){background:#ff3366;}.theme-shadow .titlebar-dots span:nth-child(2){background:#888;}.theme-shadow .titlebar-dots span:nth-child(3){background:#ccc;}
+.theme-shadow .sys-name{color:#ccc;}.theme-shadow .sys-class-badge{background:rgba(136,136,136,0.1);color:#aaa;border:1px solid rgba(136,136,136,0.3);}
+.theme-shadow .sys-stat-bar-fill{background:linear-gradient(90deg,#555,#aaa);}.theme-shadow .sys-stat-num{color:#aaa;}
+.theme-shadow .sys-pu-tag{border-color:rgba(136,136,136,0.4);color:#aaa;background:rgba(136,136,136,0.06);}.theme-shadow .sys-divider{background:rgba(136,136,136,0.3);}.theme-shadow .sys-section-title{color:#888;}.theme-shadow .portrait-placeholder{color:#888;}
+.theme-neon .sys-window-inner{background:#030810;border-color:#ff00ff;box-shadow:0 0 30px rgba(255,0,255,0.15);}.theme-neon .sys-titlebar{background:#020508;color:#ff00ff;}.theme-neon .sys-titlebar::after{background:rgba(255,0,255,0.3);}
+.theme-neon .titlebar-dots span:nth-child(1){background:#ff00ff;}.theme-neon .titlebar-dots span:nth-child(2){background:#00d4ff;}.theme-neon .titlebar-dots span:nth-child(3){background:#ffd700;}
+.theme-neon .sys-name{color:#ff00ff;}.theme-neon .sys-class-badge{background:rgba(255,0,255,0.1);color:#ff00ff;border:1px solid rgba(255,0,255,0.3);}
+.theme-neon .sys-stat-bar-fill{background:linear-gradient(90deg,#ff00ff,#00d4ff);}.theme-neon .sys-stat-num{color:#ff00ff;}
+.theme-neon .sys-pu-tag{border-color:rgba(255,0,255,0.4);color:#ff00ff;background:rgba(255,0,255,0.08);}.theme-neon .sys-divider{background:rgba(255,0,255,0.3);}.theme-neon .sys-section-title{color:#ff00ff;}.theme-neon .portrait-placeholder{color:#ff00ff;}
+.theme-blood .sys-window-inner{background:#0f0508;border-color:#cc2200;box-shadow:0 0 30px rgba(200,34,0,0.18);}.theme-blood .sys-titlebar{background:#080200;color:#cc2200;}.theme-blood .sys-titlebar::after{background:rgba(200,34,0,0.4);}
+.theme-blood .titlebar-dots span:nth-child(1){background:#cc2200;}.theme-blood .titlebar-dots span:nth-child(2){background:#880000;}.theme-blood .titlebar-dots span:nth-child(3){background:#ff5533;}
+.theme-blood .sys-name{color:#ff4422;}.theme-blood .sys-class-badge{background:rgba(200,34,0,0.12);color:#ff4422;border:1px solid rgba(200,34,0,0.35);}
+.theme-blood .sys-stat-bar-fill{background:linear-gradient(90deg,#880000,#ff4422);}.theme-blood .sys-stat-num{color:#ff4422;}
+.theme-blood .sys-pu-tag{border-color:rgba(200,34,0,0.4);color:#ff4422;background:rgba(200,34,0,0.08);}.theme-blood .sys-divider{background:rgba(200,34,0,0.35);}.theme-blood .sys-section-title{color:#cc2200;}.theme-blood .portrait-placeholder{color:#cc2200;}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#0d1220;border:1px solid var(--accent);border-radius:4px;color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;padding:10px 22px;opacity:0;pointer-events:none;transition:all 0.3s;z-index:9999;text-transform:uppercase;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* CARD ACTION BAR */
+.card-action-bar{display:flex;gap:6px;padding:8px 12px;background:rgba(0,0,0,0.3);border-top:1px solid rgba(255,255,255,0.05);}
+.card-action-btn{flex:1;padding:6px 4px;border-radius:3px;font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;border:1px solid;background:transparent;display:flex;align-items:center;justify-content:center;gap:3px;}
+.card-action-btn.share-btn{border-color:rgba(0,212,255,0.4);color:var(--accent);}
+.card-action-btn.share-btn:hover{background:rgba(0,212,255,0.1);}
+.card-action-btn.delete-btn{border-color:rgba(255,51,102,0.4);color:var(--red);}
+.card-action-btn.delete-btn:hover{background:rgba(255,51,102,0.1);}
+
+/* PORTRAIT MODAL */
+.portrait-modal-img{width:100%;max-height:340px;object-fit:contain;border-radius:6px 6px 0 0;display:block;}
+.portrait-modal-body{padding:18px 20px 22px;}
+.portrait-modal-name{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;margin-bottom:4px;}
+.portrait-modal-sub{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;opacity:0.5;margin-bottom:12px;}
+.portrait-modal-bio{font-family:'Rajdhani',sans-serif;font-size:14px;line-height:1.75;opacity:0.85;}
+
+/* ABILITY MODAL */
+.ability-modal-header{padding:20px 20px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.ability-modal-icon{font-size:40px;line-height:1;flex-shrink:0;}
+.ability-modal-icon img{width:48px;height:48px;object-fit:cover;border-radius:6px;}
+.ability-modal-name{font-family:'Orbitron',monospace;font-size:17px;font-weight:900;}
+.ability-modal-type{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;opacity:0.4;margin-top:3px;}
+.ability-modal-desc{padding:14px 20px 20px;font-family:'Rajdhani',sans-serif;font-size:14px;line-height:1.75;opacity:0.85;}
+
+/* SHARE MODAL */
+.share-modal-body{padding:22px;}
+.share-modal-title{font-family:'Orbitron',monospace;font-size:14px;letter-spacing:3px;color:var(--accent);margin-bottom:16px;text-transform:uppercase;}
+.share-url-box{display:flex;gap:8px;margin-bottom:14px;}
+.share-url-input{flex:1;background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.2);border-radius:4px;color:var(--text);padding:9px 12px;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;letter-spacing:1px;}
+.share-copy-btn{padding:9px 16px;background:var(--accent);border:none;border-radius:4px;color:#000;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;font-weight:700;transition:all 0.2s;white-space:nowrap;}
+.share-copy-btn:hover{opacity:0.85;}
+.share-options{display:flex;flex-direction:column;gap:8px;}
+.share-opt-btn{width:100%;padding:11px;border-radius:4px;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;border:1px solid;background:transparent;display:flex;align-items:center;justify-content:center;gap:8px;}
+.share-opt-btn.whatsapp{border-color:rgba(37,211,102,0.5);color:#25d366;}
+.share-opt-btn.whatsapp:hover{background:rgba(37,211,102,0.1);}
+.share-opt-btn.twitter{border-color:rgba(29,161,242,0.5);color:#1da1f2;}
+.share-opt-btn.twitter:hover{background:rgba(29,161,242,0.1);}
+.share-opt-btn.native{border-color:rgba(0,212,255,0.4);color:var(--accent);}
+.share-opt-btn.native:hover{background:rgba(0,212,255,0.08);}
+
+/* DELETE CONFIRM */
+.delete-modal-body{padding:26px 22px;text-align:center;}
+.delete-modal-icon{font-size:44px;margin-bottom:14px;}
+.delete-modal-title{font-family:'Orbitron',monospace;font-size:14px;letter-spacing:3px;color:var(--red);margin-bottom:8px;text-transform:uppercase;}
+.delete-modal-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;line-height:1.6;margin-bottom:22px;}
+.delete-modal-btns{display:flex;gap:10px;}
+.delete-cancel-btn{flex:1;padding:12px;border-radius:4px;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;border:1px solid var(--border);color:var(--text-dim);background:transparent;transition:all 0.2s;}
+.delete-cancel-btn:hover{border-color:var(--text-dim);color:var(--text);}
+.delete-confirm-btn{flex:1;padding:12px;border-radius:4px;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;border:1px solid var(--red);color:#fff;background:var(--red);transition:all 0.2s;}
+.delete-confirm-btn:hover{background:#cc0033;}
+.delete-confirm-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* clickable portrait in card */
+.sys-portrait.clickable{cursor:pointer;}
+.sys-portrait.clickable:hover{opacity:0.85;}
+.sys-pu-tag.clickable{cursor:pointer;transition:all 0.18s;}
+.sys-pu-tag.clickable:hover{transform:translateY(-2px);filter:brightness(1.3);}
+
+/* CARD BACKGROUND LAYER */
+.card-bg-wrap{position:relative;}
+.card-bg-canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:6px;pointer-events:none;z-index:0;}
+.card-bg-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:6px;pointer-events:none;z-index:0;}
+.card-bg-wrap .sys-window{position:relative;z-index:1;}
+.card-bg-wrap .sys-window-inner{background:transparent !important;}
+.card-bg-wrap .sys-body{background:rgba(4,6,14,0.15) !important;backdrop-filter:none !important;}
+.card-bg-wrap .sys-titlebar{background:rgba(2,4,10,0.25) !important;}
+.card-bg-wrap .sys-footer{background:rgba(2,4,10,0.2) !important;}
+
+@media(max-width:500px){.gallery-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-logo">⚔ CHARACTER CARDS</div>
+  <div class="nav-right">
+    <span class="nav-count" id="cardCount"></span>
+    <a class="nav-btn" href="https://nice-card-gen.netlify.app/" target="_blank">＋ CREATE CARD</a>
+    <button class="nav-btn" id="authBtn" onclick="handleAuth()">LOG IN</button>
+    <span id="authUser" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:1px;display:none;"></span>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+  <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+  <h1>⚡ CHARACTER GALLERY</h1>
+  <p>// ALL PUBLISHED CHARACTER CARDS //</p>
+</header>
+
+<div class="controls">
+  <input class="search-box" id="searchInput" type="text" placeholder="🔍  Search by name, class, author...">
+  <select class="filter-select" id="themeFilter">
+    <option value="">ALL THEMES</option>
+    <option value="cyber">CYBER</option>
+    <option value="crimson">CRIMSON</option>
+    <option value="emerald">EMERALD</option>
+    <option value="void">VOID</option>
+    <option value="gold">GOLD</option>
+    <option value="ice">ICE</option>
+    <option value="inferno">INFERNO</option>
+    <option value="shadow">SHADOW</option>
+    <option value="neon">NEON</option>
+    <option value="blood">BLOOD</option>
+  </select>
+</div>
+
+<div class="gallery-wrap">
+  <div class="loading-state" id="loadingState">
+    <div class="load-ring"></div>
+    <div class="load-text">LOADING CARDS...</div>
+  </div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="empty-icon">⚔️</div>
+    <div class="empty-title">NO CARDS FOUND</div>
+    <div class="empty-sub">Be the first to publish a character card</div>
+  </div>
+  <div class="gallery-grid" id="galleryGrid"></div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="cardModal" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-inner" id="modalInner"></div>
+  </div>
+</div>
+
+<!-- PORTRAIT MODAL -->
+<div class="modal-overlay" id="portraitModal" onclick="closePortraitModal()">
+  <div class="modal-box" onclick="event.stopPropagation()" style="border-color:var(--accent3);">
+    <button class="modal-close" onclick="closePortraitModal()">✕</button>
+    <img id="portraitModalImg" src="" alt="" class="portrait-modal-img" style="display:none;">
+    <div id="portraitModalPlaceholder" style="height:180px;display:flex;align-items:center;justify-content:center;font-size:72px;background:rgba(0,212,255,0.04);border-radius:6px 6px 0 0;">⚔️</div>
+    <div class="portrait-modal-body">
+      <div class="portrait-modal-name" id="portraitModalName">CHARACTER</div>
+      <div class="portrait-modal-sub" id="portraitModalSub"></div>
+      <div class="portrait-modal-bio" id="portraitModalBio">No bio written yet.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ABILITY MODAL -->
+<div class="modal-overlay" id="abilityModal" onclick="closeAbilityModal()">
+  <div class="modal-box" onclick="event.stopPropagation()" style="border-color:var(--accent2);">
+    <button class="modal-close" onclick="closeAbilityModal()">✕</button>
+    <div class="ability-modal-header">
+      <div class="ability-modal-icon" id="abilityModalIcon">⚡</div>
+      <div>
+        <div class="ability-modal-name" id="abilityModalName">ABILITY</div>
+        <div class="ability-modal-type">ACTIVE ABILITY</div>
+      </div>
+    </div>
+    <div class="ability-modal-desc" id="abilityModalDesc">No description provided.</div>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="shareModal" onclick="closeShareModal()">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:420px;">
+    <button class="modal-close" onclick="closeShareModal()">✕</button>
+    <div class="share-modal-body">
+      <div class="share-modal-title">📤 Share This Card</div>
+      <div class="share-url-box">
+        <input class="share-url-input" id="shareUrlInput" readonly>
+        <button class="share-copy-btn" onclick="copyShareUrl()">COPY</button>
+      </div>
+      <div class="share-options">
+        <button class="share-opt-btn whatsapp" onclick="shareWhatsApp()">💬 Share via WhatsApp</button>
+        <button class="share-opt-btn twitter" onclick="shareTwitter()">🐦 Share on X / Twitter</button>
+        <button class="share-opt-btn native" id="nativeShareBtn" onclick="nativeShare()" style="display:none;">📱 Share via Phone</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteModal" onclick="closeDeleteModal()">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:380px;border-color:var(--red);">
+    <div class="delete-modal-body">
+      <div class="delete-modal-icon">🗑️</div>
+      <div class="delete-modal-title">Delete Card?</div>
+      <div class="delete-modal-sub" id="deleteModalSub">This will permanently delete the card and its image from Cloudinary. This cannot be undone.</div>
+      <div class="delete-modal-btns">
+        <button class="delete-cancel-btn" onclick="closeDeleteModal()">CANCEL</button>
+        <button class="delete-confirm-btn" id="deleteConfirmBtn" onclick="confirmDelete()">DELETE</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, deleteDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCK2yoblWt9Y9DfCNT_Q1LkiXCT4-GLHQU",
+  authDomain: "character-card-d5b46.firebaseapp.com",
+  projectId: "character-card-d5b46",
+  storageBucket: "character-card-d5b46.firebasestorage.app",
+  messagingSenderId: "69589567362",
+  appId: "1:69589567362:web:f5045ad836dd5fb983719b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const auth = getAuth(app);
+
+let allCards = [];
+let currentUser = null;
+let pendingDeleteCard = null;
+
+// Track logged-in user
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  const authBtn = document.getElementById('authBtn');
+  const authUser = document.getElementById('authUser');
+  if (user) {
+    authBtn.textContent = 'LOG OUT';
+    authUser.textContent = '// ' + (user.displayName || user.email || '').toUpperCase().split(' ')[0];
+    authUser.style.display = 'inline';
+  } else {
+    authBtn.textContent = 'LOG IN';
+    authUser.style.display = 'none';
+  }
+  // Always re-render if cards are loaded so delete buttons update correctly
+  if (allCards.length === 0) {
+    loadCards();
+  } else {
+    renderGallery(allCards);
+  }
+});
+
+const STAT_LABELS = {
+  power:'POWER', speed:'SPEED', defense:'DEFENSE', energy:'ENERGY',
+  intellect:'INTELLECT', agility:'STRENGTH', stamina:'STAMINA', luck:'LUCK'
+};
+const ABILITY_DEFS = {
+  telekinesis:{icon:'🧲',label:'Telekinesis'}, fireball:{icon:'🔥',label:'Fireball'},
+  lightning:{icon:'⚡',label:'Lightning'}, shield:{icon:'🛡️',label:'Force Shield'},
+  heal:{icon:'💚',label:'Healing'}, stealth:{icon:'👁️',label:'Stealth'},
+  flight:{icon:'🦅',label:'Flight'}, telepathy:{icon:'🧠',label:'Telepathy'},
+  timeshift:{icon:'⏱️',label:'Time Shift'}, berserker:{icon:'💢',label:'Berserker'},
+  summon:{icon:'🌀',label:'Summon'}, ice:{icon:'❄️',label:'Cryokinesis'},
+  shadow:{icon:'🌑',label:'Shadow Walk'}, tech:{icon:'🤖',label:'Tech Boost'},
+  gravity:{icon:'🪐',label:'Gravity'}, sonic:{icon:'🔊',label:'Sonic Burst'},
+  phase:{icon:'👻',label:'Phasing'}, storm:{icon:'🌩️',label:'Storm Call'},
+  blood:{icon:'🩸',label:'Blood Craft'}, clone:{icon:'👤',label:'Clone'},
+};
+
+// ===== READ CARD DATA (supports ALL 3 structures) =====
+// Structure 1: new lightweight (data.identity object + data.abilities array)
+// Structure 2: old flat (data.charName, data.charClass etc.)
+// Structure 3: old nested (data.characterData.identity)
+function resolveCard(data) {
+  // --- Structure 1: new format (identity object + abilities array) ---
+  if (data.identity && typeof data.identity === 'object') {
+    const id = data.identity;
+    const abilitiesArr = data.abilities || [];
+    const selectedPowerups = abilitiesArr.map(a => a.id);
+    const abilityDescriptions = {};
+    const customAbilities = [];
+    abilitiesArr.forEach(a => {
+      abilityDescriptions[a.id] = a.desc || '';
+      if (a.id.startsWith('custom_')) customAbilities.push({ ...a, iconImg: a.iconURL || null });
+    });
+    return {
+      name:    id.name    || 'UNKNOWN',
+      title:   id.title   || '',
+      cls:     id.cls     || '',
+      origin:  id.origin  || '',
+      rank:    id.rank    || '',
+      faction: id.faction || '',
+      age:     id.age     || '',
+      bio:     id.bio     || '',
+      theme:   data.theme || 'cyber',
+      selectedCardBg:     data.bgType || 'none',
+      cardBgPhotoDataURL: data.bgURL  || '',
+      selectedPowerups,
+      abilityDescriptions,
+      customAbilities,
+      stats: data.stats || {},
+    };
+  }
+  // --- Structure 2: old flat save (charName, charClass...) ---
+  if (data.charName || data.charClass) {
+    return {
+      name:    data.charName    || 'UNKNOWN',
+      title:   data.charTitle   || '',
+      cls:     data.charClass   || '',
+      origin:  data.charOrigin  || '',
+      rank:    data.charRank    || '',
+      faction: data.charFaction || '',
+      age:     data.charAge     || '',
+      bio:     data.charBio     || '',
+      theme:   data.theme       || 'cyber',
+      selectedCardBg:      data.selectedCardBg     || 'none',
+      cardBgPhotoDataURL:  data.cardBgPhotoDataURL || '',
+      selectedPowerups:    data.selectedPowerups   || [],
+      abilityDescriptions: data.abilityDescriptions || {},
+      customAbilities:     data.customAbilities    || [],
+      stats: {
+        power: data.power, speed: data.speed, defense: data.defense,
+        energy: data.energy, intellect: data.intellect, agility: data.agility,
+        stamina: data.stamina, luck: data.luck,
+      },
+    };
+  }
+  // --- Structure 3: old nested (characterData wrapper) ---
+  const cd = data.characterData || {};
+  const id = cd.identity || {};
+  return {
+    name:    id.name    || 'UNKNOWN',
+    title:   id.title   || '',
+    cls:     id.cls     || '',
+    origin:  id.origin  || '',
+    rank:    id.rank    || '',
+    faction: id.faction || '',
+    age:     id.age     || '',
+    bio:     id.bio     || '',
+    theme:   cd.theme   || 'cyber',
+    selectedCardBg:      data.selectedCardBg      || cd.selectedCardBg      || 'none',
+    cardBgPhotoDataURL:  data.cardBgPhotoDataURL  || cd.cardBgPhotoDataURL  || '',
+    selectedPowerups:    cd.selectedPowerups      || [],
+    abilityDescriptions: cd.abilityDescriptions   || {},
+    customAbilities:     cd.customAbilities       || [],
+    stats: cd.stats || {},
+  };
+}
+
+function buildStatsArray(stats, compact) {
+  const arr = Object.entries(stats)
+    .filter(([,v]) => v !== undefined && v !== null)
+    .map(([id, val]) => ({ id, name: STAT_LABELS[id] || id.toUpperCase(), val: Number(val) || 0 }));
+  return compact ? arr.slice(0, 4) : arr;
+}
+
+function buildActivePUs(r) {
+  const customMap = {};
+  (r.customAbilities || []).forEach(ca => { customMap[ca.id] = ca; });
+  return (r.selectedPowerups || []).map(id => {
+    if (customMap[id]) return customMap[id];
+    const def = ABILITY_DEFS[id];
+    return def ? { id, icon: def.icon, label: def.label, desc: def.desc || '' } : { id, icon: '⚡', label: id };
+  });
+}
+
+// ===== BUILD CARD HTML =====
+// bgId is a unique string used to link canvas elements to their animation
+function buildCardHTML(data, photoURL, compact = true, bgId = '') {
+  const r = resolveCard(data);
+  const theme = r.theme;
+  const cardBg = r.selectedCardBg || 'none';
+  const cardBgPhoto = r.cardBgPhotoDataURL || data.cardBgPhotoDataURL || '';
+
+  const portrait = photoURL
+    ? `<img src="${photoURL}" alt="${r.name}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<div class="portrait-placeholder">⚔️</div>`;
+
+  const statsArr = buildStatsArray(r.stats, compact);
+  const statsHTML = statsArr.map(s =>
+    `<div class="sys-stat-row">
+      <div class="sys-stat-name">${s.name}</div>
+      <div class="sys-stat-bar-bg"><div class="sys-stat-bar-fill" style="width:${s.val}%"></div></div>
+      <div class="sys-stat-num">${s.val}</div>
+    </div>`).join('');
+
+  const activePUs = buildActivePUs(r);
+  const showPUs = compact ? activePUs.slice(0, 4) : activePUs;
+
+  const pusHTML = showPUs.map(p => {
+    const iconHTML = p.iconImg
+      ? `<img src="${p.iconImg}" style="width:10px;height:10px;object-fit:cover;border-radius:2px;">`
+      : (p.icon || '⚡');
+    const desc = r.abilityDescriptions?.[p.id] || p.desc || '';
+    if (!compact) {
+      // In expanded modal, abilities are tappable
+      const safeLabel = (p.label||'').replace(/'/g,"&#39;");
+      const safeIcon  = (p.icon||'⚡').replace(/'/g,"&#39;");
+      const safeDesc  = desc.replace(/'/g,"&#39;");
+      const safeImg   = (p.iconImg||'').replace(/'/g,"&#39;");
+      return `<div class="sys-pu-tag clickable" onclick="openAbilityModal('${safeLabel}','${safeIcon}','${safeImg}','${safeDesc}')">${iconHTML} ${p.label||''}</div>`;
+    }
+    return `<div class="sys-pu-tag">${iconHTML} ${p.label||''}</div>`;
+  }).join('');
+
+  const metaItems = [
+    r.origin  ? `<div class="sys-meta-item"><div class="meta-label">Origin</div><div class="meta-value">${r.origin}</div></div>` : '',
+    r.rank    ? `<div class="sys-meta-item"><div class="meta-label">Rank</div><div class="meta-value">${r.rank}</div></div>` : '',
+    r.faction ? `<div class="sys-meta-item"><div class="meta-label">Faction</div><div class="meta-value">${r.faction}</div></div>` : '',
+    r.age     ? `<div class="sys-meta-item"><div class="meta-label">Age</div><div class="meta-value">${r.age}</div></div>` : '',
+  ].join('');
+
+  const ts  = data.createdAt?.toDate ? data.createdAt.toDate().toISOString().split('T')[0] : '';
+  const uid = (data.id || '').slice(-8).toUpperCase() || '——';
+
+  // Portrait is tappable in expanded modal
+  const portraitEl = !compact
+    ? `<div class="sys-portrait clickable" onclick="openPortraitModal('${(photoURL||'').replace(/'/g,"&#39;")}','${r.name.replace(/'/g,"&#39;")}','${(r.title||'').replace(/'/g,"&#39;")}','${(r.cls||'').replace(/'/g,"&#39;")}','${(r.bio||'').replace(/'/g,"&#39;")}')">${portrait}</div>`
+    : `<div class="sys-portrait">${portrait}</div>`;
+
+  // Background layer HTML
+  let bgLayerHTML = '';
+  let hasBgRendered = false;
+  const hasBg = cardBg && cardBg !== 'none';
+  if (hasBg && bgId) {
+    if (cardBg === 'photo' && cardBgPhoto) {
+      bgLayerHTML = `<img class="card-bg-photo" src="${cardBgPhoto}" alt="">`;
+      hasBgRendered = true;
+    } else if (cardBg !== 'photo') {
+      bgLayerHTML = `<canvas class="card-bg-canvas" id="bgcanvas-${bgId}" data-bg="${cardBg}"></canvas>`;
+      hasBgRendered = true;
+    }
+  }
+
+  const wrapClass = hasBgRendered ? 'card-bg-wrap' : '';
+
+  return `
+    <div class="${wrapClass}">
+      ${bgLayerHTML}
+      <div class="sys-window theme-${theme}">
+        <div class="sys-window-inner">
+          <div class="sys-titlebar">
+            <div class="titlebar-dots"><span></span><span></span><span></span></div>
+            <div style="font-size:8px;letter-spacing:3px;">SYSTEM · CHARACTER FILE</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:7px;opacity:0.5;">SYS.v3.0</div>
+          </div>
+          <div class="sys-body">
+            <div class="sys-top">
+              ${portraitEl}
+              <div class="sys-identity">
+                <div class="sys-name">${r.name}</div>
+                ${r.title  ? `<div class="sys-title-txt">${r.title}</div>`  : ''}
+                ${r.cls    ? `<div class="sys-class-badge">${r.cls}</div>`  : ''}
+                <div class="sys-meta-grid">${metaItems}</div>
+              </div>
+            </div>
+            <div>
+              <div class="sys-section-title">// STAT MATRIX //</div>
+              <div class="sys-stats">${statsHTML}</div>
+            </div>
+            ${pusHTML ? `<div><hr class="sys-divider"><div class="sys-section-title">// ABILITY ROSTER — TAP TO INSPECT //</div><div class="sys-powerups">${pusHTML}</div></div>` : ''}
+          </div>
+          <div class="sys-footer"><span>ID:${uid}</span><span>CLEARANCE: LEVEL-5</span><span>${ts}</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== RENDER GALLERY =====
+function renderGallery(cards) {
+  const grid  = document.getElementById('galleryGrid');
+  const empty = document.getElementById('emptyState');
+  grid.innerHTML = '';
+  // Stop any running animations from previous render
+  stopAllAnimations();
+
+  if (cards.length === 0) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  cards.forEach((card, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'card-wrap';
+    wrap.style.animationDelay = `${i * 0.05}s`;
+    const authorName = card.authorName || 'Unknown';
+    // Check ownership by uid, email, or displayName as fallback
+    const isOwner = currentUser && (
+      (card.authorId && card.authorId === currentUser.uid) ||
+      (card.authorEmail && currentUser.email && card.authorEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (card.authorName && currentUser.displayName && card.authorName.toLowerCase() === currentUser.displayName.toLowerCase())
+    );
+
+    const safeId = card.id || '';
+    const bgId = `g${i}`; // gallery card bg id
+
+    wrap.innerHTML =
+      buildCardHTML(card, card.photoURL, true, bgId) +
+      `<div class="card-meta-bar">
+        <div class="card-author"><div class="author-dot"></div>${authorName.toUpperCase()}</div>
+        <div>TAP TO EXPAND</div>
+      </div>
+      <div class="card-action-bar">
+        <button class="card-action-btn share-btn" onclick="event.stopPropagation();openShareModal('${safeId}','${(card.charName||resolveCard(card).name).replace(/'/g,'')}')">📤 SHARE</button>
+        ${currentUser ? `<button class="card-action-btn delete-btn" onclick="event.stopPropagation();openDeleteModal('${safeId}','${card.authorId||''}')">🗑 DELETE</button>` : ''}
+      </div>`;
+
+    wrap.addEventListener('click', () => openModal(card));
+    grid.appendChild(wrap);
+  });
+
+  // Start canvas animations after DOM is ready — observer handles visibility
+  requestAnimationFrame(() => requestAnimationFrame(() => observeCardCanvases()));
+}
+
+// ===== MODAL: CARD EXPAND =====
+function openModal(card) {
+  document.getElementById('modalInner').innerHTML = buildCardHTML(card, card.photoURL, false, 'modal');
+  document.getElementById('cardModal').classList.add('open');
+  requestAnimationFrame(() => startCanvasAnimations('bgcanvas-modal'));
+}
+window.closeModal = () => {
+  document.getElementById('cardModal').classList.remove('open');
+  stopAnimation('bgcanvas-modal');
+};
+
+// ===== MODAL: PORTRAIT =====
+window.openPortraitModal = (photoURL, name, title, cls, bio) => {
+  const img = document.getElementById('portraitModalImg');
+  const ph  = document.getElementById('portraitModalPlaceholder');
+  if (photoURL) { img.src = photoURL; img.style.display = 'block'; ph.style.display = 'none'; }
+  else { img.style.display = 'none'; ph.style.display = 'flex'; }
+  document.getElementById('portraitModalName').textContent = name || 'CHARACTER';
+  document.getElementById('portraitModalSub').textContent  = [title, cls].filter(Boolean).join(' · ') || '—';
+  document.getElementById('portraitModalBio').textContent  = bio || 'No bio written yet.';
+  document.getElementById('portraitModal').classList.add('open');
+};
+window.closePortraitModal = () => document.getElementById('portraitModal').classList.remove('open');
+
+// ===== MODAL: ABILITY =====
+window.openAbilityModal = (label, icon, iconImg, desc) => {
+  const iconEl = document.getElementById('abilityModalIcon');
+  iconEl.innerHTML = iconImg ? `<img src="${iconImg}" alt="">` : (icon || '⚡');
+  document.getElementById('abilityModalName').textContent = label || 'ABILITY';
+  document.getElementById('abilityModalDesc').textContent = desc  || 'No description provided.';
+  document.getElementById('abilityModal').classList.add('open');
+};
+window.closeAbilityModal = () => document.getElementById('abilityModal').classList.remove('open');
+
+// ===== MODAL: SHARE =====
+window.openShareModal = (cardId, cardName) => {
+  const url = `${location.origin}${location.pathname}?card=${cardId}`;
+  document.getElementById('shareUrlInput').value = url;
+  window._shareUrl  = url;
+  window._shareName = cardName || 'Character Card';
+  // Show native share if supported
+  document.getElementById('nativeShareBtn').style.display = navigator.share ? 'flex' : 'none';
+  document.getElementById('shareModal').classList.add('open');
+};
+window.closeShareModal = () => document.getElementById('shareModal').classList.remove('open');
+
+window.copyShareUrl = () => {
+  navigator.clipboard.writeText(window._shareUrl || '').then(() => showToast('✓ LINK COPIED!'));
+};
+window.shareWhatsApp = () => {
+  window.open(`https://wa.me/?text=${encodeURIComponent(`Check out my character card: ${window._shareName}\n${window._shareUrl}`)}`,'_blank');
+};
+window.shareTwitter = () => {
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my character card: ${window._shareName}`)}&url=${encodeURIComponent(window._shareUrl)}`,'_blank');
+};
+window.nativeShare = () => {
+  if (navigator.share) navigator.share({ title: window._shareName, url: window._shareUrl });
+};
+
+// ===== MODAL: DELETE =====
+window.openDeleteModal = (cardId, authorId) => {
+  if (!currentUser) { showToast('✗ LOG IN TO DELETE'); return; }
+  pendingDeleteCard = allCards.find(c => c.id === cardId);
+  if (!pendingDeleteCard) return;
+
+  // Ownership check: uid match, email match, or authorId match
+  const card = pendingDeleteCard;
+  const isOwner = (
+    (card.authorId && card.authorId === currentUser.uid) ||
+    (card.authorEmail && currentUser.email && card.authorEmail.toLowerCase() === currentUser.email.toLowerCase())
+  );
+  if (!isOwner) {
+    showToast('✗ YOU CAN ONLY DELETE YOUR OWN CARDS');
+    pendingDeleteCard = null;
+    return;
+  }
+
+  document.getElementById('deleteModalSub').textContent =
+    `"${resolveCard(pendingDeleteCard).name}" will be permanently deleted including its portrait image. This cannot be undone.`;
+  document.getElementById('deleteModal').classList.add('open');
+};
+window.closeDeleteModal = () => {
+  document.getElementById('deleteModal').classList.remove('open');
+  pendingDeleteCard = null;
+};
+
+window.confirmDelete = async () => {
+  if (!pendingDeleteCard) return;
+  const btn = document.getElementById('deleteConfirmBtn');
+  btn.disabled = true; btn.textContent = 'DELETING...';
+
+  try {
+    // 1. Delete portrait from Cloudinary via delete_token (no backend needed)
+    const token = pendingDeleteCard.portraitDeleteToken;
+    if (token) {
+      const CLOUD = 'dqw3un2k3';
+      await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/delete_by_token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      }).catch(() => {}); // Don't block Firebase delete if this fails
+    }
+
+    // 2. Delete card from Firestore
+    await deleteDoc(doc(db, 'cards', pendingDeleteCard.id));
+
+    // 3. Remove from local array and re-render
+    allCards = allCards.filter(c => c.id !== pendingDeleteCard.id);
+    document.getElementById('cardCount').textContent = `${allCards.length} CARD${allCards.length !== 1 ? 'S' : ''}`;
+    renderGallery(allCards);
+
+    closeDeleteModal();
+    showToast('✓ CARD DELETED');
+  } catch(e) {
+    console.error('Delete error:', e);
+    showToast('✗ DELETE FAILED: ' + e.message);
+    btn.disabled = false; btn.textContent = 'DELETE';
+  }
+};
+
+// ===== FILTER =====
+function filterCards() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const theme  = document.getElementById('themeFilter').value;
+  const filtered = allCards.filter(card => {
+    const r = resolveCard(card);
+    const text = [r.name, r.cls, r.title, r.origin, r.faction, card.authorName].join(' ').toLowerCase();
+    return (!search || text.includes(search)) && (!theme || r.theme === theme);
+  });
+  renderGallery(filtered);
+}
+
+document.getElementById('searchInput').addEventListener('input', filterCards);
+document.getElementById('themeFilter').addEventListener('change', filterCards);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    window.closeModal(); window.closePortraitModal();
+    window.closeAbilityModal(); window.closeShareModal(); window.closeDeleteModal();
+  }
+});
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2800);
+}
+window.showToast = showToast;
+
+// ===== CANVAS BACKGROUND ANIMATIONS =====
+const _animFrames = {}; // canvasId -> rafId
+
+function stopAnimation(canvasId) {
+  if (_animFrames[canvasId]) {
+    cancelAnimationFrame(_animFrames[canvasId]);
+    delete _animFrames[canvasId];
+  }
+}
+
+function stopAllAnimations() {
+  Object.keys(_animFrames).forEach(id => {
+    cancelAnimationFrame(_animFrames[id]);
+    delete _animFrames[id];
+  });
+  if (_cardObserver) { _cardObserver.disconnect(); _cardObserver = null; }
+}
+
+// ---- launch one canvas animation ----
+function launchCanvas(canvas) {
+  if (!canvas) return;
+  const bgType = canvas.dataset.bg;
+  if (!bgType || bgType === 'none') return;
+  if (_animFrames[canvas.id]) return; // already running
+
+  function launch(retries) {
+    const wrap = canvas.parentElement;
+    const sysWin = wrap ? (wrap.querySelector('.sys-window') || wrap) : canvas;
+    const w = sysWin.offsetWidth  || sysWin.getBoundingClientRect().width;
+    const h = sysWin.offsetHeight || sysWin.getBoundingClientRect().height;
+    if ((w === 0 || h === 0) && retries > 0) {
+      setTimeout(() => launch(retries - 1), 80);
+      return;
+    }
+    // Only set canvas dimensions once (avoid flicker on resume)
+    if (canvas.width !== (w || 300) || canvas.height !== (h || 420)) {
+      canvas.width  = w || 300;
+      canvas.height = h || 420;
+    }
+    stopAnimation(canvas.id);
+    switch(bgType) {
+      case 'space':     cbgSpace(canvas);     break;
+      case 'blob':      cbgLava(canvas);      break;
+      case 'ocean':     cbgOcean(canvas);     break;
+      case 'blackhole': cbgBlackhole(canvas); break;
+      case 'rainbow':   cbgRainbow(canvas);   break;
+      case 'electric':  cbgElectric(canvas);  break;
+      case 'shadow':    cbgShadow(canvas);    break;
+      case 'cyber':     cbgRain(canvas);      break;
+      case 'flash':     cbgFlash(canvas);     break;
+      default:          cbgRain(canvas);      break;
+    }
+  }
+  launch(10);
+}
+
+// ---- IntersectionObserver: only animate visible cards ----
+let _cardObserver = null;
+
+function observeCardCanvases() {
+  // Disconnect old observer
+  if (_cardObserver) _cardObserver.disconnect();
+
+  _cardObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const canvas = entry.target;
+      if (entry.isIntersecting) {
+        launchCanvas(canvas);
+      } else {
+        stopAnimation(canvas.id);
+      }
+    });
+  }, {
+    rootMargin: '100px', // start slightly before entering viewport
+    threshold: 0.01
+  });
+
+  document.querySelectorAll('canvas.card-bg-canvas').forEach(canvas => {
+    _cardObserver.observe(canvas);
+  });
+}
+
+// Start animations on all canvas elements (or a single one by id)
+function startCanvasAnimations(singleId = null) {
+  if (singleId) {
+    // Modal canvas — launch directly, no observer needed
+    const canvas = document.getElementById(singleId);
+    launchCanvas(canvas);
+    return;
+  }
+  // Gallery cards — use IntersectionObserver
+  observeCardCanvases();
+}
+
+/* ===== CARD BACKGROUND ANIMATIONS (ported from card generator) ===== */
+// Each function takes a canvas element; uses _animFrames[canvas.id] for RAF tracking
+
+function cbgSpace(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const stars = Array.from({length:120}, () => ({x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.4+0.2, tw:Math.random()*Math.PI*2, tws:Math.random()*0.04+0.01, c:['#fff','#aef','#faf','#ffa'][Math.floor(Math.random()*4)]}));
+  const shoots=[];let st=0;
+  function draw(){
+    ctx.fillStyle='rgba(0,0,12,0.2)';ctx.fillRect(0,0,W,H);
+    stars.forEach(s=>{s.tw+=s.tws;const a=0.4+0.6*Math.sin(s.tw);ctx.globalAlpha=a;if(s.r>1){const g=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*4);g.addColorStop(0,s.c);g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.beginPath();ctx.arc(s.x,s.y,s.r*4,0,Math.PI*2);ctx.fill();}ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();});
+    ctx.globalAlpha=1;st++;if(st>60+Math.random()*80){st=0;shoots.push({x:Math.random()*W,y:Math.random()*H*0.4,vx:3+Math.random()*5,vy:1+Math.random()*3,life:1});}
+    shoots.forEach(s=>{ctx.globalAlpha=s.life;ctx.strokeStyle='#fff';ctx.lineWidth=1.2;ctx.shadowBlur=6;ctx.shadowColor='#aef';ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.vx*10,s.y-s.vy*10);ctx.stroke();ctx.shadowBlur=0;s.x+=s.vx;s.y+=s.vy;s.life-=0.03;});
+    for(let i=shoots.length-1;i>=0;i--)if(shoots[i].life<=0)shoots.splice(i,1);
+    ctx.globalAlpha=1;
+    _animFrames[canvas.id]=requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#00000c';ctx.fillRect(0,0,W,H);draw();
+}
+
+function cbgLava(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const blobs=Array.from({length:7},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.5,vy:(Math.random()-0.5)*0.3,r:30+Math.random()*60}));
+  let t=0;
+  function draw(){
+    ctx.fillStyle='rgba(10,0,0,0.25)';ctx.fillRect(0,0,W,H);
+    blobs.forEach(b=>{b.x+=b.vx;b.y+=b.vy;if(b.x<-b.r)b.x=W+b.r;if(b.x>W+b.r)b.x=-b.r;if(b.y<-b.r)b.y=H+b.r;if(b.y>H+b.r)b.y=-b.r;
+    const h=0.5+0.5*Math.sin(t+b.x*0.02);const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+    g.addColorStop(0,`rgba(255,${80+h*80},0,0.7)`);g.addColorStop(0.5,`rgba(180,20,0,0.4)`);g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();});
+    ctx.strokeStyle='rgba(255,120,0,0.1)';ctx.lineWidth=1;
+    for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(i*W/3,0);for(let y=0;y<H;y+=15)ctx.lineTo(i*W/3+Math.sin(y*0.06+t+i)*12,y);ctx.stroke();}
+    t+=0.018;
+    _animFrames[canvas.id]=requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#080000';ctx.fillRect(0,0,W,H);draw();
+}
+
+function cbgOcean(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let t=0;
+  function draw(){
+    ctx.fillStyle='rgba(0,10,30,0.2)';ctx.fillRect(0,0,W,H);
+    for(let l=0;l<5;l++){
+      const yB=H*0.1+l*(H*0.18);const sp=0.5+l*0.1;const amp=14-l*2;
+      ctx.beginPath();ctx.moveTo(0,yB);
+      for(let x=0;x<=W;x+=3){const y=yB+Math.sin((x/W)*Math.PI*4+t*sp)*amp+Math.sin((x/W)*Math.PI*7+t*sp*1.3)*amp*0.35;ctx.lineTo(x,y);}
+      ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fillStyle=`rgba(0,${80+l*20},${160+l*15},${0.12-l*0.015})`;ctx.fill();
+      if(l<2){for(let x=0;x<W;x+=60+l*25){const cx=(x+t*30)%W,cy=yB+Math.sin((cx/W)*Math.PI*4+t*sp)*amp;const sg=ctx.createRadialGradient(cx,cy,0,cx,cy,10);sg.addColorStop(0,'rgba(150,230,255,0.5)');sg.addColorStop(1,'transparent');ctx.fillStyle=sg;ctx.beginPath();ctx.arc(cx,cy,10,0,Math.PI*2);ctx.fill();}}}
+    t+=0.012;
+    _animFrames[canvas.id]=requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#000d26';ctx.fillRect(0,0,W,H);draw();
+}
+
+function cbgBlackhole(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx=W/2,cy=H/2;
+  const parts=Array.from({length:160},()=>{const a=Math.random()*Math.PI*2,d=50+Math.random()*Math.max(W,H)*0.5;return{a,d,spd:0.004+Math.random()*0.008,r:Math.random()*1.3+0.2,c:`hsla(${210+Math.random()*80},80%,70%,${Math.random()*0.8+0.2})`};});
+  function draw(){
+    ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(0,0,W,H);
+    for(let r=8;r<100;r+=5){const a=r<40?0.5:0.5*(1-(r-40)/60);ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle=`hsla(${r<40?30:200-r},90%,60%,${a*0.12})`;ctx.lineWidth=2.5;ctx.stroke();}
+    parts.forEach(p=>{p.d-=p.spd*p.d*0.008;p.a+=p.spd*(60/Math.max(p.d,15));if(p.d<20){p.d=50+Math.random()*Math.max(W,H)*0.5;p.a=Math.random()*Math.PI*2;}
+    const x=cx+Math.cos(p.a)*p.d,y=cy+Math.sin(p.a)*p.d*0.5;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(x,y,p.r,0,Math.PI*2);ctx.fill();});
+    const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,50);bg.addColorStop(0,'rgba(0,0,0,1)');bg.addColorStop(0.7,'rgba(0,0,0,0.95)');bg.addColorStop(1,'transparent');
+    ctx.fillStyle=bg;ctx.beginPath();ctx.arc(cx,cy,50,0,Math.PI*2);ctx.fill();
+    _animFrames[canvas.id]=requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);draw();
+}
+
+function cbgRainbow(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let t=0;
+  function draw(){
+    ctx.fillStyle='rgba(0,0,0,0.08)';ctx.fillRect(0,0,W,H);
+    for(let i=0;i<8;i++){
+      const hue=(t*40+i*45)%360;const x=W/2+Math.cos(t*0.5+i*Math.PI/4)*W*0.4;const y=H/2+Math.sin(t*0.7+i*Math.PI/4)*H*0.4;
+      const g=ctx.createRadialGradient(x,y,0,x,y,80+Math.sin(t+i)*20);
+      g.addColorStop(0,`hsla(${hue},100%,65%,0.4)`);g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,100,0,Math.PI*2);ctx.fill();}
+    for(let i=0;i<6;i++){const hue=(t*60+i*60)%360;ctx.globalAlpha=0.06;ctx.fillStyle=`hsl(${hue},100%,70%)`;const ys=((t*30+i*H/6))%H;ctx.fillRect(0,ys-2,W,8);}
+    ctx.globalAlpha=1;t+=0.02;
+    _animFrames[canvas.id]=requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#0a0010';ctx.fillRect(0,0,W,H);draw();
+}
+
+function cbgElectric(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const bolts=[]; let bt=0;
+  function makeBranch(x1,y1,x2,y2,depth,pts){
+    if(depth<=0){pts.push([x2,y2]);return;}
+    const mx=(x1+x2)/2+(Math.random()-0.5)*80*(depth/4);
+    const my=(y1+y2)/2+(Math.random()-0.5)*30*(depth/4);
+    makeBranch(x1,y1,mx,my,depth-1,pts);
+    if(depth>=2&&Math.random()>0.45){const fx=mx+(Math.random()-0.5)*120;const fy=my+(Math.random()*80+40);const fpts=[[mx,my]];makeBranch(mx,my,fx,fy,depth-2,fpts);bolts.push({pts:fpts,life:0.7+Math.random()*0.3,c:`hsl(${190+Math.random()*60},100%,85%)`,isBranch:true,width:0.5});}
+    makeBranch(mx,my,x2,y2,depth-1,pts);
+  }
+  function spawnBolt(){const x1=Math.random()*W;const x2=x1+(Math.random()-0.5)*200;const pts=[[x1,0]];makeBranch(x1,0,x2,H,4,pts);bolts.push({pts,life:1,c:`hsl(${195+Math.random()*40},100%,90%)`,isBranch:false,width:1.5});bolts.push({pts:[...pts],life:0.3,c:'rgba(180,230,255,0.3)',isBranch:false,width:6,glow:true});}
+  function draw(){
+    ctx.fillStyle='rgba(0,4,18,0.2)';ctx.fillRect(0,0,W,H);
+    bt++;if(bt>8+Math.random()*18){bt=0;spawnBolt();}
+    bolts.forEach(b=>{ctx.globalAlpha=b.life;ctx.strokeStyle=b.c;ctx.lineWidth=b.width;if(!b.glow){ctx.shadowBlur=b.isBranch?6:18;ctx.shadowColor=b.c;}else{ctx.shadowBlur=0;}ctx.lineJoin='round';ctx.beginPath();b.pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.shadowBlur=0;b.life-=b.isBranch?0.055:0.045;if(b.glow)b.life-=0.04;});
+    for(let i=bolts.length-1;i>=0;i--)if(bolts[i].life<=0)bolts.splice(i,1);
+    if(Math.random()>0.75){const ex=Math.random()*W,ey=Math.random()*H;const sg=ctx.createRadialGradient(ex,ey,0,ex,ey,10);sg.addColorStop(0,'rgba(140,220,255,0.6)');sg.addColorStop(1,'transparent');ctx.globalAlpha=1;ctx.fillStyle=sg;ctx.beginPath();ctx.arc(ex,ey,10,0,Math.PI*2);ctx.fill();}
+    ctx.globalAlpha=1;
+    _animFrames[canvas.id]=requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#000412';ctx.fillRect(0,0,W,H);draw();
+}
+
+function cbgShadow(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const COLORS=['#1c1c1c','#2a2a2e','#3a3a3f','#505058','#6a6a75','#8888a0','#aaaacc'];
+  const parts=Array.from({length:120},()=>({x:Math.random()*W,y:H+Math.random()*60,vx:(Math.random()-0.5)*0.5,vy:-(0.25+Math.random()*0.6),r:18+Math.random()*40,life:Math.random(),maxLife:0.5+Math.random()*0.5,c:COLORS[Math.floor(Math.random()*COLORS.length)],wobble:Math.random()*Math.PI*2,wobbleSpd:0.012+Math.random()*0.018}));
+  function draw(){
+    ctx.fillStyle='rgba(0,0,0,0.18)';ctx.fillRect(0,0,W,H);
+    parts.forEach(p=>{
+      p.wobble+=p.wobbleSpd;p.x+=p.vx+Math.sin(p.wobble)*0.6;p.y+=p.vy;p.life-=0.003+Math.random()*0.002;p.r+=0.12;
+      if(p.life<=0||p.y<-p.r*2){p.x=Math.random()*W;p.y=H+20;p.life=p.maxLife;p.r=18+Math.random()*30;p.vx=(Math.random()-0.5)*0.5;p.vy=-(0.25+Math.random()*0.6);}
+      ctx.globalAlpha=p.life*0.45;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+    });
+    ctx.globalAlpha=1;
+    _animFrames[canvas.id]=requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);draw();
+}
+
+function cbgRain(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const drops=Array.from({length:80},()=>({x:Math.random()*W,y:Math.random()*H,len:12+Math.random()*28,spd:4+Math.random()*8,width:0.5+Math.random()*1,alpha:0.3+Math.random()*0.6}));
+  function draw(){
+    ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(0,0,W,H);
+    drops.forEach(d=>{
+      const grad=ctx.createLinearGradient(d.x,d.y-d.len,d.x,d.y);
+      grad.addColorStop(0,'rgba(0,212,255,0)');grad.addColorStop(1,`rgba(0,212,255,${d.alpha})`);
+      ctx.beginPath();ctx.moveTo(d.x,d.y-d.len);ctx.lineTo(d.x,d.y);ctx.strokeStyle=grad;ctx.lineWidth=d.width;ctx.stroke();
+      ctx.beginPath();ctx.arc(d.x,d.y,d.width*0.9,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${d.alpha*0.85})`;ctx.fill();
+      d.y+=d.spd;if(d.y-d.len>H){d.y=-d.len;d.x=Math.random()*W;d.spd=4+Math.random()*8;d.len=12+Math.random()*28;d.alpha=0.3+Math.random()*0.6;}
+    });
+    _animFrames[canvas.id]=requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);draw();
+}
+
+function cbgFlash(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const twinkles=Array.from({length:55},()=>({x:Math.random()*W,y:Math.random()*H,phase:Math.random()*Math.PI*2,spd:0.05+Math.random()*0.1,r:1.2+Math.random()*2.8,hue:40+Math.floor(Math.random()*30)}));
+  const bigFlashes=[];let ft=0;
+  function draw(){
+    ctx.fillStyle='rgba(4,3,0,0.2)';ctx.fillRect(0,0,W,H);
+    const pulse=0.025+0.01*Math.sin(ft*0.035);
+    const bg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.65);
+    bg.addColorStop(0,`rgba(255,210,0,${pulse})`);bg.addColorStop(1,'transparent');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    twinkles.forEach(tw=>{tw.phase+=tw.spd;const a=Math.max(0,Math.sin(tw.phase));if(a<0.02)return;const r=tw.r*(0.5+0.5*a);ctx.globalAlpha=a*0.85;ctx.shadowBlur=8;ctx.shadowColor=`hsl(${tw.hue},100%,70%)`;ctx.fillStyle=`hsl(${tw.hue},100%,92%)`;ctx.beginPath();ctx.arc(tw.x,tw.y,r,0,Math.PI*2);ctx.fill();ctx.lineWidth=r*0.45;ctx.strokeStyle=`hsl(${tw.hue},100%,88%)`;ctx.beginPath();ctx.moveTo(tw.x-r*2.8,tw.y);ctx.lineTo(tw.x+r*2.8,tw.y);ctx.stroke();ctx.beginPath();ctx.moveTo(tw.x,tw.y-r*2.8);ctx.lineTo(tw.x,tw.y+r*2.8);ctx.stroke();ctx.shadowBlur=0;});
+    ft++;if(Math.random()>0.982){const src=twinkles[Math.floor(Math.random()*twinkles.length)];bigFlashes.push({x:src.x,y:src.y,life:1.0,maxR:55+Math.random()*90,hue:38+Math.random()*25,rays:8+Math.floor(Math.random()*6)});}
+    bigFlashes.forEach(f=>{const r=f.maxR*(1-f.life*f.life);f.life-=0.045+Math.random()*0.02;if(f.life<=0)return;ctx.globalAlpha=f.life*0.9;const g=ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,r+2);g.addColorStop(0,`hsl(${f.hue},100%,98%)`);g.addColorStop(0.15,`hsl(${f.hue},100%,90%)`);g.addColorStop(0.5,`hsl(${f.hue},100%,65%)`);g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.shadowBlur=30;ctx.shadowColor=`hsl(${f.hue},100%,70%)`;ctx.beginPath();ctx.arc(f.x,f.y,r+2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;for(let i=0;i<f.rays;i++){const angle=(i/f.rays)*Math.PI*2+(1-f.life)*0.3;ctx.lineWidth=1.2*f.life;ctx.strokeStyle=`hsl(${f.hue},100%,88%)`;ctx.beginPath();ctx.moveTo(f.x+Math.cos(angle)*r*0.2,f.y+Math.sin(angle)*r*0.2);ctx.lineTo(f.x+Math.cos(angle)*r*0.9,f.y+Math.sin(angle)*r*0.9);ctx.stroke();}});
+    for(let i=bigFlashes.length-1;i>=0;i--)if(bigFlashes[i].life<=0)bigFlashes.splice(i,1);
+    ctx.globalAlpha=1;
+    _animFrames[canvas.id]=requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#040300';ctx.fillRect(0,0,W,H);draw();
+}
+
+// ===== LOAD CARDS =====
+// ===== AUTH HANDLER =====
+async function handleAuth() {
+  if (currentUser) {
+    await signOut(auth);
+    showToast('✓ LOGGED OUT');
+  } else {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      showToast('✓ LOGGED IN');
+    } catch(e) {
+      showToast('✗ LOGIN FAILED');
+      console.error(e);
+    }
+  }
+}
+
+async function loadCards() {
+  try {
+    const q = query(collection(db, 'cards'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    allCards = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('cardCount').textContent = `${allCards.length} CARD${allCards.length !== 1 ? 'S' : ''}`;
+    renderGallery(allCards);
+    handleSharedCardLink();
+  } catch(e) {
+    console.error('Load error:', e);
+    document.getElementById('loadingState').innerHTML =
+      `<div style="text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;color:var(--red);font-size:11px;letter-spacing:2px;">
+        ✗ FAILED TO LOAD CARDS<br><br>
+        <span style="color:var(--text-dim);font-size:9px;">Check Firestore rules — make sure read is allowed</span>
+      </div>`;
+  }
+}
+
+// ===== HANDLE SHARED CARD LINK (?card=ID) =====
+async function handleSharedCardLink() {
+  const params = new URLSearchParams(location.search);
+  const cardId = params.get('card');
+  if (!cardId) return;
+
+  // Wait until cards are loaded
+  const card = allCards.find(c => c.id === cardId);
+  if (!card) return;
+
+  // Scroll to and highlight the card in the grid
+  const cardWraps = document.querySelectorAll('.card-wrap');
+  let targetWrap = null;
+  allCards.forEach((c, i) => {
+    if (c.id === cardId && cardWraps[i]) {
+      targetWrap = cardWraps[i];
+    }
+  });
+
+  if (targetWrap) {
+    targetWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    targetWrap.style.outline = '2px solid var(--accent)';
+    targetWrap.style.boxShadow = '0 0 24px rgba(0,212,255,0.5)';
+    setTimeout(() => {
+      targetWrap.style.outline = '';
+      targetWrap.style.boxShadow = '';
+    }, 3000);
+  }
+
+  // Auto-open the modal for that card
+  setTimeout(() => openModal(card), 400);
+}
+
+// Expose to global scope — module scripts are block-scoped,
+// onclick= attributes in HTML can't reach functions unless they're on window
+window.handleAuth = handleAuth;
+</script>
+</body>
+</html>
